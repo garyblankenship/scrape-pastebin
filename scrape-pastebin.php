@@ -46,11 +46,12 @@ function scrape_pastebin_user( $user, $pages = 0 ) {
 
         foreach ( $results as $result )
         {
+            $slug = $user . '/' . preg_replace( '/[^\w]+/', '-', strtolower( (string) $result ) );
+            if ( file_exists( $slug ) ) continue;
+
             $token = trim( current($result[0]['href']), '/' );
             $raw = file_get_contents( 'http://pastebin.com/raw.php?i=' . $token );
 
-            $slug = $user . '/' . preg_replace( '/[^\w]+/', '-', strtolower( (string) $result ) );
-            if ( file_exists( $slug ) ) continue;
             echo basename( $slug ) . PHP_EOL;
             file_put_contents( $slug, $raw );
         }
@@ -58,8 +59,16 @@ function scrape_pastebin_user( $user, $pages = 0 ) {
     }
 }
 
+if ( $argc < 2 )
+{
+    die("Usage: php scrape-pastebin.php username" . PHP_EOL );
+}
+
+$username = trim( $argv[1] );
+
 // example - get all pastes for username
-scrape_pastebin_user( 'username' );
+scrape_pastebin_user( $username );
+
 
 // example - get only the first page of pastes for username
 // scrape_pastebin_user( 'username', 1 );
